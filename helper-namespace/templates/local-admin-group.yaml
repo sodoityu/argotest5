@@ -1,0 +1,19 @@
+{{- range $key, $value := .Values.apigroups }}
+{{ if eq ( $value.enabled | toString) "true" }}
+{{ if $value.local_admin_group }}
+{{ if eq ( $value.local_admin_group.enabled | toString) "true" }}
+---
+kind: Group
+apiVersion: user.openshift.io/v1
+metadata:
+  name: {{ $value.name }}-group
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ $value.syncwave | default "2" | quote }}
+users:
+  {{- range $value.local_admin_group.users }}
+  - {{ . }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

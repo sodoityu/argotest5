@@ -1,0 +1,43 @@
+{{- range $key, $value := .Values.apigroups }}
+{{- range $namespacePattern := $.Values.namespace_patterns }}
+{{ if eq ( $value.enabled | toString) "true" }}
+{{- if $value.alert }}
+{{- if $value.alert.email }}
+---
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: mail-config
+  namespace: {{ printf $namespacePattern $value.name | quote }}
+  labels:
+    {{- include "common.labels" $ | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
+    argocd.argoproj.io/sync-wave: {{ $value.syncwave | default "2" | quote }}
+spec:
+  receivers:
+    - name: email
+      emailConfigs:
+        - to: {{ $value.alert.email.to_address }}
+          from: {{ $.Values.smtp.from_address }}
+          smarthost: {{ printf "%s:%s" $.Values.smtp.host $.Values.smtp.port | quote }}
+          authUsername: {{ $.Values.smtp.user }}
+          authPassword:
+            name: smtp-password-secret
+            key: password
+  route:
+    groupBy:
+      - alertname
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 12h
+    receiver: email
+    routes:
+      - matchType: =
+        name: severity
+        value: critical
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

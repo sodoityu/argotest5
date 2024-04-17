@@ -1,0 +1,20 @@
+{{- range $key, $value := .Values.apigroups }}
+{{- range $namespacePattern := $.Values.namespace_patterns }}
+{{ if eq ( $value.enabled | toString) "true" }}
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: helper-operator
+  namespace: {{ printf $namespacePattern $value.name | quote }}
+  labels:
+    {{- include "common.labels" $ | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
+    argocd.argoproj.io/sync-wave: {{ $value.syncwave | default "2" | quote }}
+spec:
+  targetNamespaces:
+    - {{ printf $namespacePattern $value.name | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,9 @@
+namespace_patterns:  []
+apigroups: []
+application_gitops_namespace: openshift-gitops
+smtp:
+  host: email-smtp.ap-northeast-1.amazonaws.com
+  port: "587"
+  user: xxxxxxxxxxx
+  from_address: dummy@example.jp
+rosa_env: dev

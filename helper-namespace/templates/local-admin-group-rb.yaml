@@ -1,0 +1,26 @@
+{{- range $key, $value := .Values.apigroups }}
+{{- range $namespacePattern := $.Values.namespace_patterns }}
+{{ if eq ( $value.enabled | toString) "true" }}
+{{ if $value.local_admin_group }}
+{{ if eq ( $value.local_admin_group.enabled | toString) "true" }}
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ $value.name }}-group
+  namespace: {{ printf $namespacePattern $value.name | quote }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ $value.syncwave | default "3" | quote }}
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: {{ $value.name }}-group
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $value.local_admin_group.clusterrole | default "admin" }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

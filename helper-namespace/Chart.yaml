@@ -1,0 +1,4 @@
+apiVersion: v2
+name: helper-namespace
+description: Create namespaces and add users to the group
+version: 1.0.0
